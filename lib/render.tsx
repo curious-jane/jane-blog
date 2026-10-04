@@ -73,13 +73,14 @@ function Block({ block }: { block: NotionBlock }) {
         </pre>
       )
     case 'image': {
-      const url = data.type === 'external' ? data.external?.url : data.file?.url
       const cap = data.caption?.map((x: any) => x.plain_text).join('')
-      if (!url) return null
+      // 外部图片（不签名、不过期）直接用；Notion 上传的图（签名、1h 过期）走本地代理
+      const src = data.type === 'external' ? data.external?.url : `/api/image/${block.id}`
+      if (!src) return null
       return (
         <figure>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={url} alt={cap || ''} loading="lazy" />
+          <img src={src} alt={cap || ''} loading="lazy" />
           {cap ? <figcaption>{cap}</figcaption> : null}
         </figure>
       )
