@@ -43,22 +43,22 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
   const blocks = await getPageBlocks(page.id)
   const date = fmtDate(page.meta.date)
+  const description = page.meta.summary || page.meta.awards || ''
 
   return (
     <article>
-      <a className="back" href="/">← 返回</a>
-      <h1>{page.meta.title}</h1>
-      <div className="art-meta">
-        {page.meta.tags?.length ? (
-          <>
-            {page.meta.tags.map((t) => <span className="tag" key={t}>{t}</span>)}{' '}
-          </>
-        ) : null}
-        {date ? <span>{date}</span> : null}
-        {page.meta.year ? <span> · {page.meta.year}</span> : null}
-      </div>
-      {page.meta.awards ? <p className="awards">{page.meta.awards}</p> : null}
-      <div className="art-body">
+      <header className="article-header">
+        <h1>{page.meta.title}</h1>
+        {description ? <p className="article-description">{description}</p> : null}
+        <div className="article-meta">
+          {page.meta.tags?.length ? (
+            page.meta.tags.map((t) => <span key={t}>#{t}</span>)
+          ) : null}
+          {date ? <span>{date}</span> : null}
+          {page.meta.year ? <span>{page.meta.year}</span> : null}
+        </div>
+      </header>
+      <div className="article-body">
         <Blocks blocks={blocks} />
       </div>
     </article>
