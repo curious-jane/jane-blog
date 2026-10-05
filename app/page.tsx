@@ -1,30 +1,20 @@
 import { getSiteContent, type PageMeta } from '@/lib/notion'
+import { site } from '@/lib/config'
 
 export const revalidate = 300
 
-function fmtDate(d?: string) {
+function fmtYear(d?: string) {
   if (!d) return ''
-  const [y, m, dd] = d.split('-')
-  if (!y) return ''
-  return m && dd ? `${y}年${Number(m)}月${Number(dd)}日` : `${y}年`
+  return d.slice(0, 4)
 }
 
-function PostItem({ it }: { it: PageMeta }) {
-  const date = fmtDate(it.date)
+function IndexItem({ it, dateLabel }: { it: PageMeta; dateLabel?: string }) {
   return (
     <li>
-      <a className="post-item" href={`/${it.slug}`}>
-        <span className="t">{it.title}</span>
-        <div className="m">
-          {it.summary ? `${it.summary}${date ? ' — ' + date : ''}` : date}
-        </div>
-        {it.tags?.length ? (
-          <div>
-            {it.tags.map((tag) => (
-              <span className="tag" key={tag}>{tag}</span>
-            ))}
-          </div>
-        ) : null}
+      <a href={`/${it.slug}`}>
+        {dateLabel ? <time>{dateLabel}</time> : <span />}
+        <span className="article-index-title">{it.title}</span>
+        {it.summary ? <span className="desc">{it.summary}</span> : null}
       </a>
     </li>
   )
@@ -34,26 +24,30 @@ export default async function Home() {
   const content = await getSiteContent()
 
   return (
-    <>
-      <div className="hero">
-        <h1>你好，我是 Jane 👋</h1>
-        {content.intro ? <p>{content.intro}</p> : null}
-      </div>
+    <div className="home">
+      <h1>{site.name}</h1>
+      {content.intro ? <p className="home-intro">{content.intro}</p> : null}
 
-      <h2 className="section" id="writings">Writings</h2>
-      <ul className="post-list">
-        {content.writings.map((it) => <PostItem key={it.id} it={it} />)}
+      <div className="section-label" id="writings">Writing</div>
+      <ul className="article-index">
+        {content.writings.map((it) => (
+          <IndexItem key={it.id} it={it} dateLabel={fmtYear(it.date)} />
+        ))}
       </ul>
 
-      <h2 className="section" id="interviews">跨界专访</h2>
-      <ul className="post-list">
-        {content.interviews.map((it) => <PostItem key={it.id} it={it} />)}
+      <div className="section-label" id="interviews">跨界专访</div>
+      <ul className="article-index">
+        {content.interviews.map((it) => (
+          <IndexItem key={it.id} it={it} />
+        ))}
       </ul>
 
-      <h2 className="section" id="projects">Projects</h2>
-      <ul className="post-list">
-        {content.projects.map((it) => <PostItem key={it.id} it={it} />)}
+      <div className="section-label" id="projects">Projects</div>
+      <ul className="article-index">
+        {content.projects.map((it) => (
+          <IndexItem key={it.id} it={it} dateLabel={it.year} />
+        ))}
       </ul>
-    </>
+    </div>
   )
 }
